@@ -8,24 +8,27 @@ namespace
 {
     class ComboBoxItemDelegate : public QStyledItemDelegate
     {
-
-
         // QAbstractItemDelegate interface
     public:
-        void paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const
+        QWidget* createEditor(QWidget* parent, const QStyleOptionViewItem& /*option*/, const QModelIndex& /*index*/) const
         {
-            QStyleOptionComboBox comboBoxOption;
-            comboBoxOption.rect = option.rect;
-            comboBoxOption.currentText = index.data(Qt::DisplayRole).toString();
-            QApplication::style()->drawComplexControl(QStyle::CC_ComboBox,
-                                               &comboBoxOption, painter);
-            QApplication::style()->drawControl(QStyle::CE_ComboBoxLabel,
-                                               &comboBoxOption, painter);
+            auto result = new QComboBox(parent);
+            for (auto pair : entities::Parameter::typeNamesMap())
+            {
+                result->addItem(pair.second, pair.first);
+            }
+            return result;
         }
 
-        QWidget* createEditor(QWidget* parent, const QStyleOptionViewItem& option, const QModelIndex& index) const
+        void setEditorData(QWidget* editor, const QModelIndex& index) const
         {
-            return new QComboBox(parent);
+            auto comboBox = qobject_cast<QComboBox*>(editor);
+            comboBox->setCurrentIndex(comboBox->findData(index.data(Qt::EditRole)));
+        }
+        void setModelData(QWidget* editor, QAbstractItemModel* model, const QModelIndex& index) const
+        {
+            auto comboBox = qobject_cast<QComboBox*>(editor);
+            model->setData(index, comboBox->currentData().toInt());
         }
     };
 }
@@ -106,19 +109,20 @@ void Dialog::on_removePushButton_clicked()
 
 void Dialog::setCurrentId(int currentId)
 {
-    if (_currentId == currentId)
+    if (_currentDeviceId == currentId)
     {
         return;
     }
 
-    _currentId = currentId;
+    _currentDeviceId = currentId;
 
-    _ui->removePushButton->setEnabled(_currentId != 0);
-    _ui->stackedWidget->setCurrentIndex(_currentId == 0 ? 0 : 1);
+    _ui->removePushButton->setEnabled(_currentDeviceId != 0);
+    _ui->stackedWidget->setCurrentIndex(_currentDeviceId == 0 ? 0 : 1);
+    _parametersModel.setCurrentDeviceId(_currentDeviceId);
 
-    if (_currentId != 0)
+    if (_currentDeviceId != 0)
     {
-        _ui->lineEdit->setText(_devicesModel.data(_devicesModel.indexById(_currentId), Qt::DisplayRole).toString());
+        _ui->lineEdit->setText(_devicesModel.data(_devicesModel.indexById(_currentDeviceId), Qt::DisplayRole).toString());
     }
 }
 
@@ -136,17 +140,17 @@ void Dialog::setCurrentParameterId(int currentId)
 
 void Dialog::on_lineEdit_editingFinished()
 {
-    if (_currentId != 0)
+    if (_currentDeviceId != 0)
     {
-        _devicesModel.updateDeviceName(_devicesModel.indexById(_currentId), _ui->lineEdit->text());
+        _devicesModel.updateDeviceName(_devicesModel.indexById(_currentDeviceId), _ui->lineEdit->text());
     }
 }
 
 void Dialog::on_addPushButton_2_clicked()
 {
-    if (_currentId != 0)
+    if (_currentDeviceId != 0)
     {
-        _parametersModel.addParameter(_currentId);
+        _parametersModel.addParameter(_currentDeviceId);
     }
 }
 

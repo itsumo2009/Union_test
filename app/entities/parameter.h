@@ -1,10 +1,11 @@
 #ifndef ENTITIES_PARAMETER_H
 #define ENTITIES_PARAMETER_H
 
+#include "db/fieldset.h"
 
 #include <QString>
+#include <map>
 
-#include "db/fieldset.h"
 
 namespace entities {
 
@@ -18,6 +19,7 @@ struct Parameter
     db::FieldSet toFieldSet() const;
     static Parameter fromFieldSet(const db::FieldSet& fieldSet);
     static QString tableName();
+    static std::map<int, QString>& typeNamesMap();
 };
 
 } // namespace entities

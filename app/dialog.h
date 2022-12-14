@@ -39,7 +39,7 @@ private:
     db::IConnection& _connection;
     models::DevicesModel _devicesModel;
     models::ParametersModel _parametersModel;
-    int _currentId = -1;
+    int _currentDeviceId = -1;
     int _currentParameterId = -1;
 };
 #endif // DIALOG_H

@@ -13,6 +13,8 @@ class ParametersModel : public QAbstractTableModel
 public:
     explicit ParametersModel(db::IConnection& connection);
 
+    void setCurrentDeviceId(int deviceId);
+
     void addParameter(int deviceId);
     void deleteParameter(const QModelIndex& index);
 
@@ -31,6 +33,7 @@ public:
 private:
     db::IConnection& _connection;
     QVector<entities::Parameter> _parameters;
+    int _currentDeviceId = 0;
 };
 
 } // namespace models

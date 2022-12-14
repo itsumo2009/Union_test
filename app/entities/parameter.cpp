@@ -27,4 +27,10 @@ QString Parameter::tableName()
     return "parameter";
 }
 
+std::map<int, QString>& Parameter::typeNamesMap()
+{
+    static std::map<int, QString> result;
+    return result;
+}
+
 } // namespace entities

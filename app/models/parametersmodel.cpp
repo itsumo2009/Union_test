@@ -13,6 +13,27 @@ ParametersModel::ParametersModel(db::IConnection& connection)
     }
 }
 
+void ParametersModel::setCurrentDeviceId(int deviceId)
+{
+    _currentDeviceId = deviceId;
+
+    beginResetModel();
+    _parameters.clear();
+    db::FieldSet set;
+    set.append("id", {});
+    set.append("name", {});
+    set.append("type_id", {});
+    set.append("device_id", _currentDeviceId);
+
+    auto query = _connection.createSelectQuery(entities::Parameter::tableName(), set);
+    query->execute();
+    while (auto result = query->getNextResult())
+    {
+        _parameters.push_back(entities::Parameter::fromFieldSet(*result));
+    }
+    endResetModel();
+}
+
 void ParametersModel::addParameter(int deviceId)
 {
     const QString name = "<Новый параметр>";
@@ -75,12 +96,12 @@ int ParametersModel::idByIndex(const QModelIndex &index)
     return 0;
 }
 
-int ParametersModel::rowCount(const QModelIndex& parent) const
+int ParametersModel::rowCount(const QModelIndex& /*parent*/) const
 {
     return _parameters.size();
 }
 
-int ParametersModel::columnCount(const QModelIndex& parent) const
+int ParametersModel::columnCount(const QModelIndex& /*parent*/) const
 {
     return 2;
 }
@@ -89,15 +110,24 @@ QVariant ParametersModel::data(const QModelIndex& index, int role) const
 {
     if (index.isValid())
     {
-        if (role == Qt::DisplayRole || role == Qt::EditRole)
+        if (index.column() == 0)
         {
-            if (index.column() == 0)
+            if (role == Qt::DisplayRole || role == Qt::EditRole)
             {
-                return _parameters[index.row()].name;
+                {
+                    return _parameters[index.row()].name;
+                }
             }
-            else
+        }
+        if (index.column() == 1)
+        {
+            if (role == Qt::DisplayRole)
             {
-                return _parameters[index.row()].deviceId;
+                return entities::Parameter::typeNamesMap()[_parameters[index.row()].typeId];
+            }
+            else if (role == Qt::EditRole)
+            {
+                return _parameters[index.row()].typeId;
             }
         }
     }
@@ -114,12 +144,16 @@ bool ParametersModel::setData(const QModelIndex& index, const QVariant& value, i
             if (index.column() == 0)
             {
                 _parameters[index.row()].name = value.toString();
-                emit dataChanged(index, index);
-
-                auto query = _connection.createUpdateQuery(entities::Parameter::tableName(), _parameters[index.row()].toFieldSet());
-                query->execute();
-                return true;
             }
+            else
+            {
+                _parameters[index.row()].typeId = value.toInt();
+            }
+            emit dataChanged(index, index);
+
+            auto query = _connection.createUpdateQuery(entities::Parameter::tableName(), _parameters[index.row()].toFieldSet());
+            query->execute();
+            return true;
         }
     }
     return false;
@@ -131,6 +165,8 @@ Qt::ItemFlags ParametersModel::flags(const QModelIndex &index) const
     {
         return QAbstractTableModel::flags(index) | Qt::ItemFlag::ItemIsEditable;
     }
+
+    return QAbstractTableModel::flags(index);
 }
 
 QVariant ParametersModel::headerData(int section, Qt::Orientation orientation, int role) const

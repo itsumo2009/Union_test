@@ -1,5 +1,6 @@
 #include "dialog.h"
 
+#include "entities/parameter.h"
 #include "core/interfaceregistry.h"
 #include "postgres/connection.h"
 
@@ -24,7 +25,13 @@ int main(int argc, char *argv[])
     postgres::Connection connection(db);
     core::InterfaceRegistry registry;
     registry.add<db::IConnection, postgres::Connection>([&connection](){ return &connection;});
-
+    auto conn = registry.get<db::IConnection>();
+    auto q = conn->createSelectQuery("type", "id, name");
+    q->execute();
+    while (auto result = q->getNextResult())
+    {
+        entities::Parameter::typeNamesMap()[result->value("id").toInt()] = result->value("name").toString();
+    };
     Dialog w(registry);
     w.show();
     return a.exec();
