@@ -6,6 +6,7 @@
 #include "core/interfaceregistry.h"
 #include "db/iconnection.h"
 #include "models/devicesmodel.h"
+#include "models/parametersmodel.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class Dialog; }
@@ -25,13 +26,20 @@ private slots:
 
     void on_lineEdit_editingFinished();
 
+    void on_addPushButton_2_clicked();
+
+    void on_removePushButton_2_clicked();
+
 private:
     void setCurrentId(int currentId);
+    void setCurrentParameterId(int currentId);
 
 private:
     Ui::Dialog *_ui;
     db::IConnection& _connection;
     models::DevicesModel _devicesModel;
+    models::ParametersModel _parametersModel;
     int _currentId = -1;
+    int _currentParameterId = -1;
 };
 #endif // DIALOG_H

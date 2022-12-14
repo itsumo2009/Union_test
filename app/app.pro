@@ -23,6 +23,7 @@ SOURCES += \
     main.cpp \
     dialog.cpp \
     models/devicesmodel.cpp \
+    models/parametersmodel.cpp \
     postgres/connection.cpp \
     postgres/query.cpp
 
@@ -35,6 +36,7 @@ HEADERS += \
     entities/device.h \
     entities/parameter.h \
     models/devicesmodel.h \
+    models/parametersmodel.h \
     postgres/connection.h \
     postgres/query.h
 

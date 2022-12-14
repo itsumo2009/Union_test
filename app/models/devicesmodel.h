@@ -18,7 +18,7 @@ public:
     };
 
 public:
-    DevicesModel(db::IConnection& connection);
+    explicit DevicesModel(db::IConnection& connection);
 
     void addDevice();
     void deleteDevice(const QModelIndex& index);
